@@ -1,7 +1,8 @@
 
 import { GoogleGenAI, GenerateContentResponse, Type, FunctionDeclaration } from "@google/genai";
 
-const API_KEY = process.env.API_KEY || '';
+// Variabel untuk melacak urutan rotasi key
+let keyIndex = 0;
 
 export const generateVisualFunction: FunctionDeclaration = {
   name: 'generate_visual',
@@ -19,15 +20,31 @@ export const generateVisualFunction: FunctionDeclaration = {
 };
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  /**
+   * Mengambil API Key yang tersedia dan melakukan rotasi jika ada lebih dari satu.
+   * Format di Vercel/Environment: API_KEY="key1,key2,key3"
+   */
+  private getRotatedAI(): GoogleGenAI {
+    const rawKeys = process.env.API_KEY || '';
+    const keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    
+    if (keys.length === 0) {
+      throw new Error("API Key tidak ditemukan di environment variable.");
+    }
 
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: API_KEY });
+    // Ambil key berdasarkan index saat ini
+    const currentKey = keys[keyIndex % keys.length];
+    
+    // Geser index untuk request berikutnya
+    keyIndex++;
+    
+    // Selalu buat instance baru untuk memastikan key yang digunakan adalah yang terbaru
+    return new GoogleGenAI({ apiKey: currentKey });
   }
 
   async chat(prompt: string, history: { role: string; parts: { text: string }[] }[] = [], systemInstruction: string) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || API_KEY });
+      const ai = this.getRotatedAI();
       
       const finalInstruction = (systemInstruction || "You are Rival, a professional AI assistant.") + 
         "\nSTRICT RULE: Never use double asterisks (**) in your output. No markdown bolding allowed.";
@@ -64,7 +81,7 @@ export class GeminiService {
 
   async generateImage(prompt: string) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || API_KEY });
+      const ai = this.getRotatedAI();
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
@@ -79,7 +96,8 @@ export class GeminiService {
       if (candidate?.content?.parts) {
         for (const part of candidate.content.parts) {
           if (part.inlineData) {
-            generatedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
+            const base64Data = part.inlineData.data;
+            generatedImageUrl = `data:image/png;base64,${base64Data}`;
           } else if (part.text) {
             textResponse += part.text.replace(/\*\*/g, '');
           }
@@ -95,7 +113,7 @@ export class GeminiService {
 
   async editImage(prompt: string, imageBase64: string) {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || API_KEY });
+      const ai = this.getRotatedAI();
       const cleanBase64 = imageBase64.split(',')[1] || imageBase64;
 
       const response = await ai.models.generateContent({
@@ -118,11 +136,15 @@ export class GeminiService {
       let editedImageUrl: string | null = null;
       let textResponse = "";
 
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
-        if (part.inlineData) {
-          editedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
-        } else if (part.text) {
-          textResponse = part.text.replace(/\*\*/g, '');
+      const candidate = response.candidates?.[0];
+      if (candidate?.content?.parts) {
+        for (const part of candidate.content.parts) {
+          if (part.inlineData) {
+            const base64Data = part.inlineData.data;
+            editedImageUrl = `data:image/png;base64,${base64Data}`;
+          } else if (part.text) {
+            textResponse = part.text.replace(/\*\*/g, '');
+          }
         }
       }
 
