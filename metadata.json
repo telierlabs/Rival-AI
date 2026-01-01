@@ -1,0 +1,7 @@
+{
+  "name": "Rival AI Assistant",
+  "description": "An elegant, professional AI chat assistant powered by Gemini 3 and Gemini 2.5 Flash for advanced image editing and natural text conversations.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rival AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px; /* Increased base font size */
+        }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-modern { font-family: 'Outfit', sans-serif; }
+
+        /* Unified Theme Colors - No Blue */
+        .theme-white { background-color: #ffffff; color: #111827; --border-color: rgba(0,0,0,0.08); --input-bg: rgba(255,255,255,0.8); --accent-color: #000000; }
+        .theme-black { background-color: #000000; color: #ffffff; --border-color: #222222; --input-bg: #111111; --accent-color: #ffffff; }
+        .theme-cream { background-color: #fdfaf3; color: #3e3a34; --border-color: rgba(62,58,52,0.12); --input-bg: rgba(253,250,243,0.8); --accent-color: #1a1a1a; }
+        .theme-slate { background-color: #111111; color: #f1f5f9; --border-color: rgba(255,255,255,0.1); --input-bg: rgba(30,30,30,0.8); --accent-color: #f8fafc; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        ::selection {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .chat-input-focus:focus-within {
+            border-color: var(--accent-color) !important;
+        }
+        
+        /* Larger text classes override */
+        .text-huge { font-size: 1.25rem; line-height: 1.75rem; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
