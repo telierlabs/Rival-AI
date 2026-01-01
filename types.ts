@@ -6,13 +6,23 @@ export interface Message {
   timestamp: Date;
   imageUrl?: string;
   isImageEditing?: boolean;
+  codeSnippet?: string;
+  isSaved?: boolean;
 }
+
+export type ConversationMode = 'general' | 'coding' | 'image';
 
 export interface ChatSession {
   id: string;
   title: string;
   messages: Message[];
   updatedAt: Date;
+  activeMode?: ConversationMode;
+}
+
+export interface UserUsage {
+  lastResetDate: string; // YYYY-MM-DD
+  imageCount: number;
 }
 
 export interface UserProfile {
@@ -24,8 +34,10 @@ export interface UserProfile {
   joinedDate: string;
   theme: 'white' | 'black' | 'cream' | 'slate';
   font: 'inter' | 'serif' | 'mono' | 'modern';
+  fontSize: number;
   aiName: string;
   aiPersona: string;
+  isSubscribed: boolean;
   security: {
     twoFactor: boolean;
     encryptSessions: boolean;

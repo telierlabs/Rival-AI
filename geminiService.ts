@@ -27,8 +27,11 @@ export class GeminiService {
 
   async chat(prompt: string, history: { role: string; parts: { text: string }[] }[] = [], systemInstruction: string) {
     try {
-      // Menggunakan instance baru setiap kali untuk memastikan API Key terbaru digunakan
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || API_KEY });
+      
+      const finalInstruction = (systemInstruction || "You are Rival, a professional AI assistant.") + 
+        "\nSTRICT RULE: Never use double asterisks (**) in your output. No markdown bolding allowed.";
+
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: [
@@ -36,10 +39,21 @@ export class GeminiService {
           { role: 'user', parts: [{ text: prompt }] }
         ],
         config: {
-          systemInstruction: systemInstruction || "You are Rival, a professional AI assistant.",
+          systemInstruction: finalInstruction,
           tools: [{ functionDeclarations: [generateVisualFunction] }],
         }
       });
+
+      // Post-processing: Bersihkan teks dari simbol ** secara aman
+      const candidate = response.candidates?.[0];
+      if (candidate?.content?.parts) {
+        candidate.content.parts = candidate.content.parts.map(part => {
+          if (part.text) {
+            return { ...part, text: part.text.replace(/\*\*/g, '') };
+          }
+          return part;
+        });
+      }
 
       return response;
     } catch (error) {
@@ -67,7 +81,7 @@ export class GeminiService {
           if (part.inlineData) {
             generatedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
           } else if (part.text) {
-            textResponse += part.text;
+            textResponse += part.text.replace(/\*\*/g, '');
           }
         }
       }
@@ -108,7 +122,7 @@ export class GeminiService {
         if (part.inlineData) {
           editedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
         } else if (part.text) {
-          textResponse = part.text;
+          textResponse = part.text.replace(/\*\*/g, '');
         }
       }
 

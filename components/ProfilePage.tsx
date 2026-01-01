@@ -7,11 +7,12 @@ interface ProfilePageProps {
   onUpdateProfile: (profile: UserProfile) => void;
   onBack: () => void;
   onClearData: () => void;
+  onLogout: () => void;
 }
 
-type SubPage = 'menu' | 'ai' | 'style' | 'font' | 'user' | 'security';
+type SubPage = 'menu' | 'ai' | 'style' | 'font' | 'user' | 'security' | 'subscription';
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ profile, onUpdateProfile, onBack, onClearData }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ profile, onUpdateProfile, onBack, onClearData, onLogout }) => {
   const [view, setView] = useState<SubPage>('menu');
   const [state, setState] = useState<UserProfile>(profile);
   const userFileRef = useRef<HTMLInputElement>(null);
@@ -48,13 +49,109 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ profile, onUpdateProfi
         </div>
       </div>
       
+      <MenuBtn title="Layanan Rival" subtitle={state.isSubscribed ? "Status: Premium" : "Status: Gratis"} onClick={() => setView('subscription')} />
       <MenuBtn title="Identitas Rival" subtitle="Instruksi & Persona Sistem" onClick={() => setView('ai')} />
       <MenuBtn title="Tema & Visual" subtitle="Warna Antarmuka Monochrome" onClick={() => setView('style')} />
       <MenuBtn title="Tipografi" subtitle="Jenis & Ukuran Font Sistem" onClick={() => setView('font')} />
       <MenuBtn title="Profil Pengguna" subtitle="Informasi & Avatar Anda" onClick={() => setView('user')} />
       <MenuBtn title="Keamanan & Privasi" subtitle="Enkripsi & Manajemen Data" onClick={() => setView('security')} />
+      
+      <div className="pt-8">
+        <button 
+          onClick={onLogout}
+          className="w-full text-left py-6 px-6 text-red-500 opacity-60 hover:opacity-100 transition-opacity font-black uppercase text-[10px] tracking-[0.3em]"
+        >
+          Keluar dari Sesi
+        </button>
+      </div>
     </div>
   );
+
+  const renderSubscription = () => {
+    const isDark = state.theme === 'black' || state.theme === 'slate';
+    // Gunakan warna eksplisit untuk memastikan teks terbaca di semua mode
+    const cardBg = isDark ? 'bg-zinc-900/80' : 'bg-zinc-50';
+    const activeText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+    const mutedText = isDark ? 'text-zinc-400' : 'text-zinc-500';
+    const buttonStyle = isDark ? 'bg-zinc-100 text-zinc-950 hover:bg-white' : 'bg-zinc-900 text-zinc-50 hover:bg-black';
+
+    return (
+      <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-400">
+        <SubHeader title="Layanan Rival" onBack={() => setView('menu')} />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1: Ad-based */}
+          <div className={`p-8 rounded-[2.5rem] border border-current/10 ${cardBg} flex flex-col shadow-lg`}>
+            <div className="mb-6">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${mutedText}`}>GRATIS</span>
+              <h3 className={`text-xl font-black uppercase mt-1 ${activeText}`}>AD-SUPPORTED</h3>
+            </div>
+            <p className={`text-xs font-medium leading-relaxed mb-8 flex-1 ${mutedText}`}>
+              Generate hingga 20 gambar per hari dengan mendukung sistem melalui iklan video.
+            </p>
+            <div className="space-y-4 mb-10">
+              <BenefitItem text="20 Visual / Hari" />
+              <BenefitItem text="Akses Model Dasar" />
+            </div>
+            <button 
+              className={`w-full py-4 ${buttonStyle} rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-95`}
+              onClick={() => alert("Menyiapkan video iklan...")}
+            >
+              nonton iklan 1x
+            </button>
+          </div>
+
+          {/* Card 2: Pro (40 gbr) */}
+          <div className={`p-8 rounded-[2.5rem] border border-current/20 ${cardBg} flex flex-col relative shadow-2xl overflow-hidden`}>
+            <div className="absolute top-6 right-6">
+               <span className={`${isDark ? 'bg-zinc-100 text-zinc-950' : 'bg-zinc-900 text-zinc-100'} px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest`}>POPULER</span>
+            </div>
+            <div className="mb-6">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${mutedText}`}>Rp 5.000</span>
+              <h3 className={`text-xl font-black uppercase mt-1 ${activeText}`}>PRO PLAN</h3>
+            </div>
+            <p className={`text-xs font-medium leading-relaxed mb-8 flex-1 ${mutedText}`}>
+              Dapatkan kuota lebih besar untuk kreativitas Anda. Ideal untuk penggunaan rutin.
+            </p>
+            <div className="space-y-4 mb-10">
+              <BenefitItem text="40 Visual / Hari" />
+              <BenefitItem text="Akses Model Pro" />
+              <BenefitItem text="Web Studio Lite" />
+            </div>
+            <button 
+              className={`w-full py-4 ${buttonStyle} rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-current/10`}
+              onClick={() => alert("Menghubungkan ke sistem pembayaran (Midtrans)...")}
+            >
+              langganan
+            </button>
+          </div>
+
+          {/* Card 3: Unlimited */}
+          <div className={`p-8 rounded-[2.5rem] border-2 border-current ${isDark ? 'bg-zinc-800' : 'bg-white'} flex flex-col shadow-2xl relative`}>
+            <div className="mb-6">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${mutedText}`}>Rp 15.000 / bln</span>
+              <h3 className={`text-xl font-black uppercase mt-1 ${activeText}`}>ULTIMATE</h3>
+            </div>
+            <p className={`text-xs font-medium leading-relaxed mb-8 flex-1 ${mutedText}`}>
+              Akses tanpa batas ke seluruh ekosistem Rival Neural Engine tanpa kompromi.
+            </p>
+            <div className="space-y-4 mb-10">
+              <BenefitItem text="Unlimited Visual" />
+              <BenefitItem text="Web Studio Pro" />
+              <BenefitItem text="Prioritas Neural" />
+              <BenefitItem text="Enkripsi VIP" />
+            </div>
+            <button 
+              className={`w-full py-4 ${buttonStyle} rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-current/20`}
+              onClick={() => alert("Menghubungkan ke sistem pembayaran (Midtrans)...")}
+            >
+              langganan
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderSecurity = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-400">
@@ -178,17 +275,49 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ profile, onUpdateProfi
   const renderFont = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-400">
       <SubHeader title="Tipografi" onBack={() => setView('menu')} />
-      <div className="grid grid-cols-2 gap-4">
-        {fonts.map(f => (
-          <button 
-            key={f}
-            onClick={() => { const n = { ...state, font: f }; setState(n); handleSave(n); }}
-            className={`p-8 border rounded-3xl text-left flex justify-between items-center transition-all ${state.font === f ? 'border-current bg-current/5' : 'border-current/10 opacity-40 hover:opacity-100'}`}
-          >
-            <span className={`text-base font-bold font-${f}`}>{f.charAt(0).toUpperCase() + f.slice(1)}</span>
-            {state.font === f && <div className="w-3 h-3 bg-current rounded-full" />}
-          </button>
-        ))}
+      <div className="space-y-12">
+        <div className="grid grid-cols-2 gap-4">
+          {fonts.map(f => (
+            <button 
+              key={f}
+              onClick={() => { const n = { ...state, font: f }; setState(n); handleSave(n); }}
+              className={`p-8 border rounded-3xl text-left flex justify-between items-center transition-all ${state.font === f ? 'border-current bg-current/5' : 'border-current/10 opacity-40 hover:opacity-100'}`}
+            >
+              <span className={`text-base font-bold font-${f}`}>{f.charAt(0).toUpperCase() + f.slice(1)}</span>
+              {state.font === f && <div className="w-3 h-3 bg-current rounded-full" />}
+            </button>
+          ))}
+        </div>
+
+        <div className="pt-10 border-t border-current/10 space-y-8">
+          <div className="flex justify-between items-end">
+            <div>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-1">Ukuran Teks</h4>
+              <p className="text-xs opacity-50">Sesuaikan kenyamanan membaca sistem</p>
+            </div>
+            <span className="text-2xl font-black">{state.fontSize}px</span>
+          </div>
+          <div className="relative flex items-center group">
+            <input 
+              type="range"
+              min="12"
+              max="24"
+              step="1"
+              value={state.fontSize}
+              onChange={(e) => {
+                const n = { ...state, fontSize: parseInt(e.target.value) };
+                setState(n);
+                handleSave(n);
+              }}
+              className="w-full h-1.5 bg-current/10 rounded-full appearance-none cursor-pointer accent-current"
+            />
+          </div>
+          <div className="flex justify-between px-1">
+            <span className="text-[10px] font-black opacity-20 uppercase tracking-widest">Kecil</span>
+            <span className="text-[10px] font-black opacity-20 uppercase tracking-widest">Standar</span>
+            <span className="text-[10px] font-black opacity-20 uppercase tracking-widest">Besar</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -254,10 +383,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ profile, onUpdateProfi
         {view === 'font' && renderFont()}
         {view === 'user' && renderUser()}
         {view === 'security' && renderSecurity()}
+        {view === 'subscription' && renderSubscription()}
       </div>
     </div>
   );
 };
+
+const BenefitItem: React.FC<{ text: string }> = ({ text }) => (
+  <div className="flex items-center gap-3">
+    <div className="w-5 h-5 rounded-full bg-current/5 flex items-center justify-center">
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+    </div>
+    <span className="text-[10px] font-black uppercase tracking-widest opacity-80">{text}</span>
+  </div>
+);
 
 const MenuBtn: React.FC<{ title: string; subtitle: string; onClick: () => void }> = ({ title, subtitle, onClick }) => (
   <button 
